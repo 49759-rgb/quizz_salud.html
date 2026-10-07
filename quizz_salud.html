@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Salud Mental</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #101114;
+            color: #f4f4f4;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 850px;
+        }
+
+        /* Encabezado */
+
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: #8ee6c4;
+        }
+
+        .contador {
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Barra */
+
+        .barra {
+            width: 100%;
+            height: 4px;
+            background: #292b30;
+            margin-bottom: 45px;
+        }
+
+        .progreso {
+            height: 100%;
+            width: 20%;
+            background: #8ee6c4;
+            transition: .4s;
+        }
+
+        /* Pregunta */
+
+        .pregunta {
+            font-size: clamp(28px, 5vw, 48px);
+            line-height: 1.1;
+            max-width: 750px;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .pregunta small {
+            display: block;
+            color: #8ee6c4;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        /* Respuestas */
+
+        .opciones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opcion {
+            background: #181a1f;
+            border: 1px solid #303238;
+            color: #eee;
+            padding: 22px;
+            text-align: left;
+            cursor: pointer;
+            transition: .25s;
+            font-size: 16px;
+            min-height: 75px;
+        }
+
+        .opcion:hover {
+            border-color: #8ee6c4;
+            transform: translateY(-3px);
+        }
+
+        .opcion.correcta {
+            background: #18382f;
+            border-color: #8ee6c4;
+        }
+
+        .opcion.incorrecta {
+            background: #3a2025;
+            border-color: #e66d7a;
+        }
+
+        /* Botón */
+
+        .siguiente {
+            margin-top: 30px;
+            padding: 15px 28px;
+            background: #8ee6c4;
+            color: #101114;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            display: none;
+            transition: .2s;
+        }
+
+        .siguiente:hover {
+            transform: translateX(5px);
+        }
+
+        /* Resultado */
+
+        .resultado {
+            display: none;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .resultado h2 {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .resultado p {
+            color: #aaa;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .puntuacion {
+            font-size: 70px;
+            color: #8ee6c4;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .reiniciar {
+            padding: 14px 25px;
+            background: transparent;
+            color: #8ee6c4;
+            border: 1px solid #8ee6c4;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+
+        @media (max-width: 600px) {
+            .opciones {
+                grid-template-columns: 1fr;
+            }
+
+            .pregunta {
+                font-size: 32px;
+            }
+
+            .encabezado {
+                margin-bottom: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+        <div class="logo">MENTE<span>.</span></div>
+        <div class="contador" id="contador">01 / 05</div>
+    </div>
+
+    <div class="barra">
+        <div class="progreso" id="progreso"></div>
+    </div>
+
+    <main id="quiz">
+
+        <div class="pregunta">
+            <small>Pregunta 01</small>
+            ¿Qué es la salud mental?
+        </div>
+
+        <div class="opciones" id="opciones"></div>
+
+        <button class="siguiente" id="siguiente">
+            Siguiente →
+        </button>
+
+    </main>
+
+    <div class="resultado" id="resultado">
+        <div class="puntuacion" id="puntuacion">0/5</div>
+
+        <h2>Quiz terminado.</h2>
+
+        <p id="mensaje">
+            Gracias por participar. Recuerda que cuidar tu mente también es cuidar de ti.
+        </p>
+
+        <button class="reiniciar" onclick="reiniciar()">
+            Intentar nuevamente
+        </button>
+    </div>
+
+</div>
+
+<script>
+
+const preguntas = [
+
+    {
+        pregunta: "¿Qué es la salud mental?",
+        opciones: [
+            "No tener ningún problema en la vida",
+            "El bienestar emocional, psicológico y social de una persona",
+            "Estar feliz todo el tiempo",
+            "No sentir emociones"
+        ],
+        correcta: 1
+    },
+
+    {
+        pregunta: "¿Cuál puede ser una señal de que alguien necesita apoyo emocional?",
+        opciones: [
+            "Sentirse triste ocasionalmente",
+            "Dormir bien",
+            "Cambios fuertes y constantes en el ánimo o comportamiento",
+            "Tener un buen día"
+        ],
+        correcta: 2
+    },
+
+    {
+        pregunta: "¿Hablar sobre lo que sentimos puede ayudar a nuestra salud mental?",
+        opciones: [
+            "Sí",
+            "No",
+            "Solo si estamos felices",
+            "Nunca"
+        ],
+        correcta: 0
+    },
+
+    {
+        pregunta: "¿Qué podemos hacer cuando nos sentimos emocionalmente sobrepasados?",
+        opciones: [
+            "Guardarnos todo",
+            "Aislarnos de todos",
+            "Buscar apoyo de alguien de confianza o de un profesional",
+            "Ignorar lo que sentimos"
+        ],
+        correcta: 2
+    },
+
+    {
+        pregunta: "¿Ir con un psicólogo significa que una persona está 'loca'?",
+        opciones: [
+            "Sí",
+            "No",
+            "Solo algunas veces",
+            "Depende de la persona"
+        ],
+        correcta: 1
+    }
+
+];
+
+let preguntaActual = 0;
+let puntos = 0;
+let respondida = false;
+
+const opciones = document.getElementById("opciones");
+const siguiente = document.getElementById("siguiente");
+const progreso = document.getElementById("progreso");
+const contador = document.getElementById("contador");
+
+function mostrarPregunta() {
+
+    respondida = false;
+
+    const pregunta = preguntas[preguntaActual];
+
+    document.querySelector(".pregunta").innerHTML = `
+        <small>Pregunta ${String(preguntaActual + 1).padStart(2, "0")}</small>
+        ${pregunta.pregunta}
+    `;
+
+    opciones.innerHTML = "";
+
+    pregunta.opciones.forEach((opcion, index) => {
+
+        const boton = document.createElement("button");
+
+        boton.classList.add("opcion");
+        boton.textContent = opcion;
+
+        boton.onclick = () => seleccionarRespuesta(index, boton);
+
+        opciones.appendChild(boton);
+    });
+
+    contador.textContent =
+        ${String(preguntaActual + 1).padStart(2, "0")} / 05;
+
+    progreso.style.width =
+        ${((preguntaActual + 1) / preguntas.length) * 100}%;
+
+    siguiente.style.display = "none";
+}
+
+function seleccionarRespuesta(index, boton) {
+
+    if (respondida) return;
+
+    respondida = true;
+
+    const correcta = preguntas[preguntaActual].correcta;
+    const botones = document.querySelectorAll(".opcion");
+
+    if (index === correcta) {
+
+        puntos++;
+        boton.classList.add("correcta");
+
+    } else {
+
+        boton.classList.add("incorrecta");
+        botones[correcta].classList.add("correcta");
+
+    }
+
+    siguiente.style.display = "inline-block";
+}
+
+siguiente.onclick = () => {
+
+    preguntaActual++;
+
+    if (preguntaActual < preguntas.length) {
+
+        mostrarPregunta();
+
+    } else {
+
+        mostrarResultado();
+
+    }
+
+};
+
+function mostrarResultado() {
+
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("resultado").style.display = "block";
+
+    document.getElementById("puntuacion").textContent =
+        ${puntos}/5;
+
+    let mensaje = "";
+
+    if (puntos === 5) {
+        mensaje = "¡Excelente! Tienes buenas bases sobre el cuidado de la salud mental.";
+    } 
+    else if (puntos >= 3) {
+        mensaje = "¡Bien! Tienes buenos conocimientos, aunque todavía puedes aprender más.";
+    } 
+    else {
+        mensaje = "La salud mental es importante. Siempre hay oportunidad para aprender y cuidar mejor de nosotros mismos.";
+    }
+
+    document.getElementById("mensaje").textContent = mensaje;
+}
+
+function reiniciar() {
+
+    preguntaActual = 0;
+    puntos = 0;
+
+    document.getElementById("quiz").style.display = "block";
+    document.getElementById("resultado").style.display = "none";
+
+    mostrarPregunta();
+}
+
+mostrarPregunta();
+
+</script>
+
+</body>
+</html>
